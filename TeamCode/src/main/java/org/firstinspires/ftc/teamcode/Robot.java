@@ -7,10 +7,12 @@ package org.firstinspires.ftc.teamcode;
  */
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -25,6 +27,10 @@ public class Robot {
     public MecanumDrive drive;
     public Lift lift;
     public Grabber grabber;
+    public TouchSensor bumpSensorLeft, bumpSensorRight;
+    public Debouncer bumbDebouncer = new Debouncer();
+    public Rev2mDistanceSensor poleSensor;
+
 
 	public BNO055IMU imu = null;
 
@@ -37,15 +43,22 @@ public class Robot {
         this.drive = new MecanumDrive(hardwareMap, runtime);
         this.lift = new Lift(hardwareMap);
         this.grabber = new Grabber(hardwareMap);
+        this.bumpSensorLeft = hardwareMap.get(TouchSensor.class, "bumpLeft");
+        this.bumpSensorRight = hardwareMap.get(TouchSensor.class, "bumpRight");
+        this.poleSensor = hardwareMap.get(Rev2mDistanceSensor.class, "Pole");
+
 
 
 		// Setup Gyro Sensors
         this.imu = hardwareMap.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-        parameters.mode = BNO055IMU.SensorMode.GYRONLY;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.mode = BNO055IMU.SensorMode.IMU;
         //parameters.calibrationDataFile = "BNO055IMUCalibration.json";
         this.imu.initialize(parameters);
+
+        while (!imu.isGyroCalibrated()) { }
+        BNO055IMUUtil.remapZAxis(imu, AxisDirection.NEG_Y);
     }
 
     /*
@@ -74,6 +87,19 @@ public class Robot {
     }
 
     public double getHeading() {
-        return imu.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).firstAngle;
+        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
+    }
+
+    public Orientation getAngles() {
+        return imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+    }
+
+    public boolean bumperPressed() {
+        return bumbDebouncer.isPressed(bumpSensorLeft.isPressed() && bumpSensorRight.isPressed());
+    }
+
+    public Robot rotateToDegree(double degree) {
+
+        return this;
     }
 }

@@ -1,24 +1,18 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.util.ElapsedTime;
+class Debouncer {
+    private boolean lock = false;
 
-public class Debouncer {
-    private int bounceThreshold = 10;
-    private int onSamples = 0;
-
-    public Debouncer(int threshold) {
-        bounceThreshold = threshold;
-    }
-
-    public Debouncer() {}
-
-    public boolean isPressed(boolean value) {
-        if (value) {
-            onSamples++;
-        }
-        if (onSamples >= bounceThreshold) {
-            onSamples = 0;
-            return true;
+    public boolean isPressed(boolean input) {
+        if (input) {
+            if (!lock) {
+                lock = true;
+                return true;
+            }
+        } else {
+            if (lock) {
+                lock = false;
+            }
         }
         return false;
     }

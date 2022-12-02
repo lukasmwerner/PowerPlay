@@ -2,11 +2,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name="Autonomous Right")
+@Autonomous(name="Unlimited claw test")
 
-public class AutonomousRight extends LinearOpMode {
+public class ClawTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         ElapsedTime time = new ElapsedTime();
@@ -15,17 +17,15 @@ public class AutonomousRight extends LinearOpMode {
 
         Vision vision = new Vision(hardwareMap);
 
-        int id = vision.getIdentifier();
+        final double inchesPerBox = 21.5; // 23.3 for meet
+        int id = 3;
 
-        waitForStart();
-
-        if (id == 1) {
-            robot.drive.left().goFor(1);
-            robot.drive.forward();
+        while (opModeInInit()) {
+            id = vision.getIdentifier();
+            telemetry.addData("Id:", id);
+            telemetry.update();
         }
 
-
-
-
+        waitForStart();
     }
 }
